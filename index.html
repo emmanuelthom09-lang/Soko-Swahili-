@@ -3,526 +3,728 @@
 <html lang="sw">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0f766e">
-  <meta name="description" content="Soko Swahili - Nunua na uza bidhaa kwa urahisi.">
-  <title>Soko Swahili | Soko lako la mtandaoni</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#087f68">
+  <meta name="description" content="Soko Swahili - nunua na uza bidhaa kwa urahisi.">
+  <title>Soko Swahili | Marketplace</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; }
-    .btn { padding:10px 15px; border-radius:10px; font-weight:600; }
-    .primary { background:#0f766e; color:white; }
-    .field { width:100%; padding:11px; border:1px solid #d1d5db; border-radius:9px; margin-top:5px; color:#111827; }
-    .card { border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; background:white; }
-    .hidden { display:none !important; }
+    body { font-family: Arial, sans-serif; background: #f6f8fa; }
+    .product-card { transition: .2s ease; }
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px #00000012;
+    }
+    .product-image { height: 270px; object-fit: contain; background: white; }
+    .modal-backdrop { background: rgb(0 0 0 / 55%); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    @media(max-width: 640px) {
+      .product-image { height: 205px; }
+    }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
 
-<header class="bg-teal-800 text-white">
-  <div class="max-w-6xl mx-auto p-4 flex flex-wrap items-center justify-between gap-3">
-    <a href="#" class="text-2xl font-bold">Soko Swahili</a>
-    <div class="flex flex-wrap gap-2">
-      <button class="btn bg-white text-teal-800" onclick="setLanguage()">SW / EN</button>
-      <button class="btn border border-white" onclick="show('auth')">Ingia / Jisajili</button>
-      <button class="btn bg-amber-400 text-black" onclick="show('vip')">VIP</button>
+<body class="text-slate-800">
+
+<header class="sticky top-0 z-30 bg-white shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <a href="#" class="text-xl md:text-2xl font-extrabold text-emerald-800">
+      🛍️ Soko Swahili
+    </a>
+
+    <div class="flex gap-2 items-center">
+      <button id="langBtn" onclick="toggleLanguage()"
+        class="border rounded-lg px-3 py-2 font-semibold">EN</button>
+      <button id="accountBtn" onclick="openAuth()"
+        class="rounded-lg bg-emerald-800 text-white px-4 py-2 font-semibold">
+        Ingia
+      </button>
     </div>
   </div>
+
+  <nav class="border-t">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex gap-5 overflow-x-auto text-sm font-semibold">
+      <a href="#vip" data-sw="Bidhaa za VIP" data-en="VIP Products">Bidhaa za VIP</a>
+      <a href="#standard" data-sw="Bidhaa zote" data-en="All Products">Bidhaa zote</a>
+      <a href="#sell" data-sw="Uza bidhaa" data-en="Sell Products">Uza bidhaa</a>
+    </div>
+  </nav>
 </header>
 
-<main class="max-w-6xl mx-auto p-4 space-y-8">
-  <section class="bg-teal-50 rounded-2xl p-6 md:p-10">
-    <p class="text-teal-800 font-semibold">Karibu Soko Swahili</p>
-    <h1 id="heroTitle" class="text-3xl md:text-5xl font-bold mt-3">Nunua na uza kwa urahisi.</h1>
-    <p id="heroText" class="mt-3 text-gray-600">Gundua bidhaa, linganisha bei na wasiliana moja kwa moja na wauzaji.</p>
-    <div class="flex flex-wrap gap-3 mt-5">
-      <button class="btn primary" onclick="show('productForm')">+ Weka bidhaa</button>
-      <button class="btn border border-teal-800 text-teal-800" onclick="document.getElementById('products').scrollIntoView()">Tazama bidhaa</button>
-    </div>
+<main class="max-w-7xl mx-auto px-4 py-5 md:py-8">
+
+  <section class="rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-950 to-emerald-700 text-white p-6 md:p-12">
+    <span class="uppercase tracking-widest text-sm text-emerald-200"
+      data-sw="Soko lako la kidijitali"
+      data-en="Your digital marketplace">Soko lako la kidijitali</span>
+
+    <h1 class="text-3xl md:text-5xl font-extrabold mt-3 max-w-3xl"
+      data-sw="Nunua na uza kwa urahisi."
+      data-en="Buy and sell with ease.">
+      Nunua na uza kwa urahisi.
+    </h1>
+
+    <p class="mt-4 max-w-2xl text-emerald-50"
+      data-sw="Gundua bidhaa, linganisha bei na wasiliana na wauzaji moja kwa moja."
+      data-en="Discover products, compare prices and contact sellers directly.">
+      Gundua bidhaa, linganisha bei na wasiliana na wauzaji moja kwa moja.
+    </p>
+
+    <button onclick="postProduct()" class="mt-6 rounded-xl bg-white text-emerald-900 px-6 py-3 font-bold">
+      + <span data-sw="Weka bidhaa yako" data-en="List your product">Weka bidhaa yako</span>
+    </button>
   </section>
 
-  <section id="announcementsSection" class="hidden">
-    <h2 class="text-xl font-bold mb-3">Matangazo</h2>
-    <div id="announcements" class="grid md:grid-cols-2 gap-3"></div>
+  <section class="mt-6 bg-white rounded-2xl p-4 border grid grid-cols-1 md:grid-cols-3 gap-3">
+    <input id="searchInput" type="search"
+      class="border rounded-xl p-3 w-full"
+      placeholder="Tafuta bidhaa..."
+      oninput="renderProducts()">
+
+    <select id="categoryFilter" class="border rounded-xl p-3" onchange="renderProducts()">
+      <option value="all" data-sw="Makundi yote" data-en="All categories">Makundi yote</option>
+      <option value="Electronics">Electronics / Elektroniki</option>
+      <option value="Fashion">Fashion / Mitindo</option>
+      <option value="Home">Home / Nyumbani</option>
+      <option value="Other">Other / Nyingine</option>
+    </select>
+
+    <select id="sortFilter" class="border rounded-xl p-3" onchange="renderProducts()">
+      <option value="new" data-sw="Mpya kwanza" data-en="Newest first">Mpya kwanza</option>
+      <option value="low" data-sw="Bei ndogo kwanza" data-en="Lowest price first">Bei ndogo kwanza</option>
+      <option value="high" data-sw="Bei kubwa kwanza" data-en="Highest price first">Bei kubwa kwanza</option>
+    </select>
   </section>
 
-  <section>
-    <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
-      <h2 id="productsTitle" class="text-2xl font-bold">Bidhaa zilizopo</h2>
-      <button class="btn border" onclick="loadProducts()">Refresh</button>
-    </div>
-    <div class="grid md:grid-cols-3 gap-3 mb-4">
-      <input id="search" class="field mt-0" placeholder="Tafuta bidhaa..." oninput="renderProducts()">
-      <select id="categoryFilter" class="field mt-0" onchange="renderProducts()">
-        <option value="">Makundi yote</option>
-        <option>Electronics</option><option>Fashion</option><option>Home</option>
-        <option>Vehicles</option><option>Property</option><option>Food</option><option>Other</option>
-      </select>
-      <select id="sort" class="field mt-0" onchange="renderProducts()">
-        <option value="new">Mpya kwanza</option>
-        <option value="low">Bei: chini kwenda juu</option>
-        <option value="high">Bei: juu kwenda chini</option>
-      </select>
-    </div>
-    <p id="productMessage" class="text-gray-500 mb-3">Inapakia bidhaa...</p>
-    <div id="products" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-  </section>
-
-  <section class="bg-white border rounded-2xl p-5">
-    <h2 class="text-2xl font-bold">Jiunge na VIP</h2>
-    <p class="text-gray-600 mt-2">Pata alama ya VIP na nafasi ya kipaumbele baada ya malipo kuthibitishwa na admin.</p>
-    <div class="grid sm:grid-cols-2 gap-4 mt-4">
-      <div class="border rounded-xl p-4">
-        <h3 class="font-bold">VIP ya wiki</h3>
-        <p class="text-2xl font-bold mt-2">TZS 3,000</p>
+  <section id="vip" class="mt-10">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-2xl md:text-3xl font-extrabold"
+          data-sw="💎 Bidhaa za VIP"
+          data-en="💎 VIP Products">💎 Bidhaa za VIP</h2>
+        <p class="text-slate-500 text-sm mt-1"
+          data-sw="Bidhaa zilizoangaziwa"
+          data-en="Featured products">Bidhaa zilizoangaziwa</p>
       </div>
-      <div class="border rounded-xl p-4">
-        <h3 class="font-bold">VIP ya mwezi</h3>
-        <p class="text-2xl font-bold mt-2">TZS 10,000</p>
-      </div>
+      <span class="rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-xs font-bold">VIP</span>
     </div>
-    <button class="btn primary mt-4" onclick="show('vip')">Omba VIP</button>
+    <div id="vipProducts" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </section>
 
-  <section class="bg-white border rounded-2xl p-5">
-    <h2 class="text-xl font-bold">Alika rafiki</h2>
-    <p class="text-gray-600 mt-2">Shiriki kiungo chako cha Soko Swahili. Ufuatiliaji wa referrals unahitaji pia kuunganishwa na utaratibu wa database uliopo.</p>
-    <button class="btn primary mt-3" onclick="shareReferral()">Shiriki kiungo</button>
-    <p id="refMessage" class="text-sm mt-2"></p>
+  <section id="standard" class="mt-12">
+    <h2 class="text-2xl md:text-3xl font-extrabold mb-5"
+      data-sw="Bidhaa zote"
+      data-en="All Products">Bidhaa zote</h2>
+    <div id="standardProducts" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </section>
 
-  <section class="border rounded-2xl bg-gray-100 p-5">
-    <h2 class="font-bold">Washirika na nafasi za matangazo</h2>
-    <p class="text-sm text-gray-600 mt-1">Nafasi za matangazo. Majina haya si uthibitisho wa ushirikiano rasmi.</p>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-      <div class="bg-white rounded-xl p-4 text-center">Vodacom</div>
-      <div class="bg-white rounded-xl p-4 text-center">Airtel</div>
-      <div class="bg-white rounded-xl p-4 text-center">Yas</div>
-      <div class="bg-white rounded-xl p-4 text-center">CRDB / NMB</div>
-    </div>
+  <section id="sell" class="mt-12 rounded-2xl bg-emerald-50 border border-emerald-100 p-6 md:p-8">
+    <h2 class="text-2xl font-bold"
+      data-sw="Una bidhaa ya kuuza?"
+      data-en="Have something to sell?">Una bidhaa ya kuuza?</h2>
+    <p class="mt-2 text-slate-600"
+      data-sw="Fungua akaunti au ingia, kisha weka bidhaa yako sokoni."
+      data-en="Create an account or log in, then list your product.">
+      Fungua akaunti au ingia, kisha weka bidhaa yako sokoni.
+    </p>
+    <button onclick="postProduct()" class="mt-4 rounded-xl bg-emerald-800 text-white px-5 py-3 font-bold"
+      data-sw="Anza kuuza"
+      data-en="Start selling">Anza kuuza</button>
+  </section>
+
+  <section class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <article class="bg-white border rounded-2xl p-5">
+      <h3 class="font-bold text-lg">💎 VIP</h3>
+      <p class="text-slate-600 text-sm mt-2"
+        data-sw="Wiki: TSh 3,000 · Mwezi: TSh 10,000"
+        data-en="Weekly: TZS 3,000 · Monthly: TZS 10,000">
+        Wiki: TSh 3,000 · Mwezi: TSh 10,000
+      </p>
+      <p class="text-xs text-slate-500 mt-2"
+        data-sw="Malipo na uanzishaji wa VIP vitathibitishwa na mfumo wa usimamizi."
+        data-en="VIP payments and activation require administrator verification.">
+        Malipo na uanzishaji wa VIP vitathibitishwa na mfumo wa usimamizi.
+      </p>
+    </article>
+
+    <article class="bg-white border rounded-2xl p-5">
+      <h3 class="font-bold text-lg">🔗 Affiliate</h3>
+      <p class="text-slate-600 text-sm mt-2"
+        data-sw="Shiriki link yako ya rufaa baada ya kuingia."
+        data-en="Share your referral link after logging in.">
+        Shiriki link yako ya rufaa baada ya kuingia.
+      </p>
+    </article>
+
+    <article class="bg-white border rounded-2xl p-5">
+      <h3 class="font-bold text-lg">📢 <span data-sw="Matangazo" data-en="Advertisements">Matangazo</span></h3>
+      <p class="text-slate-600 text-sm mt-2"
+        data-sw="Nafasi ya matangazo ya biashara na huduma."
+        data-en="Advertising space for businesses and services.">
+        Nafasi ya matangazo ya biashara na huduma.
+      </p>
+    </article>
   </section>
 </main>
 
-<footer class="bg-gray-900 text-white text-center p-6 mt-8">
-  <p class="font-bold">Soko Swahili</p>
-  <p class="text-sm text-gray-300 mt-2">Nunua kwa urahisi. Uza kwa uhuru.</p>
+<footer class="mt-14 bg-slate-950 text-white">
+  <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-4 justify-between">
+    <div>
+      <p class="font-bold text-xl">🛍️ Soko Swahili</p>
+      <p class="text-slate-400 text-sm mt-2"
+        data-sw="Soko lako, fursa yako."
+        data-en="Your marketplace, your opportunity.">Soko lako, fursa yako.</p>
+    </div>
+    <p class="text-slate-400 text-sm">© <span id="year"></span> Soko Swahili</p>
+  </div>
 </footer>
 
 <!-- LOGIN / SIGNUP -->
-<div id="auth" class="hidden fixed inset-0 bg-black/60 z-50 overflow-y-auto p-4">
-  <div class="bg-white rounded-2xl p-5 max-w-md mx-auto my-6">
+<div id="authModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop p-4">
+  <div class="max-w-md mx-auto mt-8 bg-white rounded-2xl p-6 shadow-xl">
     <div class="flex justify-between items-center">
-      <h2 class="text-xl font-bold">Akaunti yako</h2>
-      <button onclick="hide('auth')" class="text-2xl">&times;</button>
+      <h2 id="authTitle" class="text-2xl font-bold">Ingia</h2>
+      <button onclick="closeModal('authModal')" class="text-3xl" aria-label="Close">×</button>
     </div>
-    <form id="authForm" class="space-y-3 mt-4">
-      <label>Jina la mtumiaji (kwa usajili)
-        <input id="username" class="field" autocomplete="username" placeholder="Jina lako">
-      </label>
-      <label>Barua pepe
-        <input id="email" type="email" class="field" required autocomplete="email">
-      </label>
-      <label>Namba ya simu (kwa usajili)
-        <input id="phone" class="field" placeholder="07XXXXXXXX">
-      </label>
-      <label>Mtandao wa simu (kwa usajili)
-        <select id="network" class="field">
-          <option value="">Chagua mtandao</option>
-          <option>Vodacom</option><option>Airtel</option><option>Yas</option><option>Halotel</option><option>TTCL</option>
-        </select>
-      </label>
-      <label>Benki (si lazima)
-        <input id="bank" class="field" placeholder="CRDB, NMB n.k.">
-      </label>
-      <label>Nenosiri
-        <input id="password" type="password" minlength="6" class="field" required autocomplete="current-password">
-      </label>
-      <label>Namba ya referral (si lazima)
-        <input id="referral" class="field" placeholder="Referral code">
-      </label>
-      <button class="btn primary w-full" type="submit">Ingia / Jisajili</button>
-    </form>
-    <button class="btn border w-full mt-3" onclick="logout()">Toka kwenye akaunti</button>
-    <p id="authMessage" class="text-sm mt-3"></p>
-  </div>
-</div>
 
-<!-- ADD PRODUCT -->
-<div id="productForm" class="hidden fixed inset-0 bg-black/60 z-50 overflow-y-auto p-4">
-  <div class="bg-white rounded-2xl p-5 max-w-lg mx-auto my-4">
-    <div class="flex justify-between items-center">
-      <h2 class="text-xl font-bold">Weka bidhaa</h2>
-      <button onclick="hide('productForm')" class="text-2xl">&times;</button>
+    <div class="grid grid-cols-2 gap-2 my-5">
+      <button id="loginTab" onclick="setAuthMode('login')" class="rounded-lg p-3 bg-emerald-800 text-white">Ingia</button>
+      <button id="signupTab" onclick="setAuthMode('signup')" class="rounded-lg p-3 bg-slate-100">Jisajili</button>
     </div>
-    <form id="addProductForm" class="space-y-3 mt-4">
-      <label>Jina la bidhaa<input id="pTitle" class="field" required maxlength="120"></label>
-      <label>Kundi
-        <select id="pCategory" class="field" required>
-          <option value="">Chagua kundi</option>
-          <option>Electronics</option><option>Fashion</option><option>Home</option>
-          <option>Vehicles</option><option>Property</option><option>Food</option><option>Other</option>
-        </select>
-      </label>
-      <div class="grid grid-cols-2 gap-3">
-        <label>Bei<input id="pPrice" type="number" min="0" step="0.01" class="field" required></label>
-        <label>Sarafu
-          <select id="pCurrency" class="field"><option>TZS</option><option>USD</option></select>
-        </label>
+
+    <form id="authForm" class="space-y-3">
+      <div id="usernameWrap" class="hidden">
+        <label class="block text-sm mb-1" data-sw="Jina la mtumiaji" data-en="Username">Jina la mtumiaji</label>
+        <input id="username" class="w-full border rounded-xl p-3" autocomplete="username">
       </div>
-      <label>Eneo<input id="pLocation" class="field" required placeholder="Mfano: Moshi"></label>
-      <label>Maelezo<textarea id="pDescription" class="field" rows="3" maxlength="3000" required></textarea></label>
-      <label>Namba ya WhatsApp<input id="pWhatsapp" class="field" required placeholder="2557XXXXXXXX"></label>
-      <label>Picha za bidhaa (unaweza kuchagua zaidi ya moja)
-        <input id="pImages" type="file" class="field" accept="image/*" multiple>
-      </label>
-      <p class="text-xs text-gray-500">Picha zitapakiwa kwenye Supabase Storage bucket yenye ruhusa sahihi.</p>
-      <button class="btn primary w-full" type="submit">Chapisha bidhaa</button>
+
+      <div id="phoneWrap" class="hidden">
+        <label class="block text-sm mb-1" data-sw="Namba ya simu" data-en="Phone number">Namba ya simu</label>
+        <input id="phone" type="tel" class="w-full border rounded-xl p-3" autocomplete="tel">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Email</label>
+        <input id="email" type="email" required class="w-full border rounded-xl p-3" autocomplete="email">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1" data-sw="Nenosiri" data-en="Password">Nenosiri</label>
+        <input id="password" type="password" required minlength="6" class="w-full border rounded-xl p-3" autocomplete="current-password">
+      </div>
+
+      <div id="confirmWrap" class="hidden">
+        <label class="block text-sm mb-1" data-sw="Thibitisha nenosiri" data-en="Confirm password">Thibitisha nenosiri</label>
+        <input id="confirmPassword" type="password" minlength="6" class="w-full border rounded-xl p-3" autocomplete="new-password">
+      </div>
+
+      <button id="authSubmit" class="w-full bg-emerald-800 text-white rounded-xl p-3 font-bold" type="submit">Ingia</button>
+      <p id="authMessage" class="text-sm break-words" role="status"></p>
     </form>
-    <p id="productFormMessage" class="text-sm mt-3"></p>
   </div>
 </div>
 
-<!-- VIP REQUEST -->
-<div id="vip" class="hidden fixed inset-0 bg-black/60 z-50 overflow-y-auto p-4">
-  <div class="bg-white rounded-2xl p-5 max-w-md mx-auto my-6">
+<!-- PRODUCT FORM -->
+<div id="productModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop p-4">
+  <div class="max-w-xl mx-auto my-5 bg-white rounded-2xl p-6 shadow-xl">
     <div class="flex justify-between items-center">
-      <h2 class="text-xl font-bold">Ombi la VIP</h2>
-      <button onclick="hide('vip')" class="text-2xl">&times;</button>
+      <h2 class="text-2xl font-bold" data-sw="Weka bidhaa" data-en="List a product">Weka bidhaa</h2>
+      <button onclick="closeModal('productModal')" class="text-3xl" aria-label="Close">×</button>
     </div>
-    <p class="mt-3">Namba ya malipo: <strong>0798033596</strong></p>
-    <p class="text-sm text-gray-600 mt-1">Thibitisha namba hii kabla ya kutuma pesa. Weka transaction ID baada ya kulipa. VIP haitaanza mpaka admin athibitishe malipo.</p>
-    <form id="vipForm" class="space-y-3 mt-4">
-      <label>Kifurushi
-        <select id="vipPackage" class="field">
-          <option value="weekly">Wiki - TZS 3,000</option>
-          <option value="monthly">Mwezi - TZS 10,000</option>
-        </select>
-      </label>
-      <label>Namba uliyotumia kulipa<input id="paymentPhone" class="field" required></label>
-      <label>Transaction ID<input id="transactionId" class="field" required></label>
-      <button class="btn primary w-full" type="submit">Tuma ombi la uthibitisho</button>
+
+    <form id="productForm" class="space-y-3 mt-5">
+      <div>
+        <label class="block text-sm mb-1" data-sw="Jina la bidhaa" data-en="Product title">Jina la bidhaa</label>
+        <input id="pTitle" required maxlength="120" class="w-full border rounded-xl p-3">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm mb-1" data-sw="Kundi" data-en="Category">Kundi</label>
+          <select id="pCategory" required class="w-full border rounded-xl p-3">
+            <option value="Electronics">Electronics</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Home">Home</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1" data-sw="Bei" data-en="Price">Bei</label>
+          <input id="pPrice" type="number" min="1" required class="w-full border rounded-xl p-3">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1" data-sw="Eneo" data-en="Location">Eneo</label>
+        <input id="pLocation" required maxlength="100" class="w-full border rounded-xl p-3" placeholder="Arusha, Tanzania">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1" data-sw="Namba ya WhatsApp yenye msimbo wa nchi" data-en="WhatsApp number with country code">
+          Namba ya WhatsApp yenye msimbo wa nchi
+        </label>
+        <input id="pWhatsapp" required type="tel" class="w-full border rounded-xl p-3" placeholder="2557XXXXXXXX">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1" data-sw="Maelezo ya bidhaa" data-en="Product description">Maelezo ya bidhaa</label>
+        <textarea id="pDescription" required maxlength="3000" rows="4" class="w-full border rounded-xl p-3"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1" data-sw="Picha ya bidhaa" data-en="Product image">Picha ya bidhaa</label>
+        <input id="pImage" type="file" accept="image/jpeg,image/png,image/webp" class="w-full border rounded-xl p-3">
+        <p class="text-xs text-slate-500 mt-1" data-sw="Tumia picha ya bidhaa yako. JPEG, PNG au WebP." data-en="Use your own product image. JPEG, PNG or WebP.">
+          Tumia picha ya bidhaa yako. JPEG, PNG au WebP.
+        </p>
+      </div>
+
+      <button id="productSubmit" type="submit" class="w-full bg-emerald-800 text-white rounded-xl p-3 font-bold"
+        data-sw="Wasilisha bidhaa" data-en="Submit product">Wasilisha bidhaa</button>
+      <p id="productMessage" class="text-sm break-words" role="status"></p>
     </form>
-    <p id="vipMessage" class="text-sm mt-3"></p>
   </div>
 </div>
 
 <script>
-(() => {
-  "use strict";
-
+  // PUBLIC browser configuration: never put a Supabase secret key here.
   const SUPABASE_URL = "https://glfbkrxpphriulpbxuko.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__-wkooZvpKfVdHlgiyuUCg_rjHB5Icr";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
   const STORAGE_BUCKET = "product-images";
-
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-  let currentUser = null;
-  let allProducts = [];
   let language = "sw";
+  let authMode = "login";
+  let currentUser = null;
+  let realProducts = [];
+  let allProducts = [];
 
-  const $ = id => document.getElementById(id);
-  window.show = id => $(id).classList.remove("hidden");
-  window.hide = id => $(id).classList.add("hidden");
-
-  function message(id, text, error = false) {
-    $(id).textContent = text;
-    $(id).className = "text-sm mt-3 " + (error ? "text-red-600" : "text-teal-700");
-  }
-
-  function safe(value) {
-    return String(value ?? "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-    })[c]);
-  }
-
-  function money(price, currency) {
-    return safe(currency) + " " + Number(price || 0).toLocaleString();
-  }
-
-  async function init() {
-    if (!window.supabase) {
-      $("productMessage").textContent = "Supabase library haijapakia. Refresh ukurasa.";
-      return;
+  // Clearly labelled demonstration listings; not real seller offers.
+  const demoProducts = [
+    {
+      id: "demo-vip-1",
+      title: "Wireless Headphones — DEMO",
+      category: "Electronics",
+      price: 45000,
+      currency: "TZS",
+      location: "Arusha, Tanzania",
+      description: "Mfano wa bidhaa. Bei na eneo ni za majaribio.",
+      image_urls: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=85"],
+      whatsapp_number: "",
+      is_vip: true,
+      is_demo: true,
+      created_at: "2026-10-13"
+    },
+    {
+      id: "demo-vip-2",
+      title: "Red Sneakers — DEMO",
+      category: "Fashion",
+      price: 65000,
+      currency: "TZS",
+      location: "Moshi, Tanzania",
+      description: "Mfano wa bidhaa. Bei na eneo ni za majaribio.",
+      image_urls: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=85"],
+      whatsapp_number: "",
+      is_vip: true,
+      is_demo: true,
+      created_at: "2026-10-12"
+    },
+    {
+      id: "demo-standard-1",
+      title: "Smartphone — DEMO",
+      category: "Electronics",
+      price: 280000,
+      currency: "TZS",
+      location: "Dar es Salaam, Tanzania",
+      description: "Mfano wa bidhaa. Bei na eneo ni za majaribio.",
+      image_urls: ["https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1000&q=85"],
+      whatsapp_number: "",
+      is_vip: false,
+      is_demo: true,
+      created_at: "2026-10-11"
+    },
+    {
+      id: "demo-standard-2",
+      title: "Living Room Sofa — DEMO",
+      category: "Home",
+      price: 350000,
+      currency: "TZS",
+      location: "Arusha, Tanzania",
+      description: "Mfano wa bidhaa. Bei na eneo ni za majaribio.",
+      image_urls: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=85"],
+      whatsapp_number: "",
+      is_vip: false,
+      is_demo: true,
+      created_at: "2026-10-10"
+    },
+    {
+      id: "demo-standard-3",
+      title: "Audio Headphones — DEMO",
+      category: "Electronics",
+      price: 35000,
+      currency: "TZS",
+      location: "Dodoma, Tanzania",
+      description: "Mfano wa bidhaa. Bei na eneo ni za majaribio.",
+      image_urls: ["https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=1000&q=85"],
+      whatsapp_number: "",
+      is_vip: false,
+      is_demo: true,
+      created_at: "2026-10-09"
     }
-    const { data, error } = await db.auth.getSession();
-    if (error) console.error(error);
-    currentUser = data?.session?.user || null;
-    updateAuthButton();
-    await Promise.all([loadProducts(), loadAnnouncements()]);
-    db.auth.onAuthStateChange((_event, session) => {
-      currentUser = session?.user || null;
-      updateAuthButton();
-    });
+  ];
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  function t(sw, en) {
+    return language === "sw" ? sw : en;
   }
 
-  function updateAuthButton() {
-    const buttons = document.querySelectorAll('header button');
-    if (buttons.length > 1) {
-      buttons[1].textContent = currentUser
-        ? (currentUser.email || "Akaunti")
-        : (language === "sw" ? "Ingia / Jisajili" : "Login / Sign up");
-    }
-  }
-
-  window.setLanguage = function() {
+  function toggleLanguage() {
     language = language === "sw" ? "en" : "sw";
-    $("heroTitle").textContent = language === "sw"
-      ? "Nunua na uza kwa urahisi."
-      : "Buy and sell with ease.";
-    $("heroText").textContent = language === "sw"
-      ? "Gundua bidhaa, linganisha bei na wasiliana moja kwa moja na wauzaji."
-      : "Discover products, compare prices and contact sellers directly.";
-    $("productsTitle").textContent = language === "sw" ? "Bidhaa zilizopo" : "Available products";
-    updateAuthButton();
-  };
+    document.documentElement.lang = language;
+    document.getElementById("langBtn").textContent = language === "sw" ? "EN" : "SW";
 
-  window.loadProducts = async function() {
-    $("productMessage").textContent = "Inapakia bidhaa...";
-    const { data, error } = await db.from("products")
-      .select("id,seller_id,title,category,price,currency,location,description,image_urls,whatsapp_number,status,created_at")
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(100);
+    document.querySelectorAll("[data-sw][data-en]").forEach(el => {
+      el.textContent = el.dataset[language];
+    });
 
-    if (error) {
-      $("productMessage").textContent = "Imeshindikana kupakia bidhaa: " + error.message;
-      return;
-    }
-    allProducts = data || [];
+    document.getElementById("searchInput").placeholder =
+      t("Tafuta bidhaa...", "Search products...");
+
+    setAuthMode(authMode);
     renderProducts();
-  };
+  }
 
-  window.renderProducts = function() {
-    const query = $("search").value.trim().toLowerCase();
-    const category = $("categoryFilter").value;
-    const sort = $("sort").value;
-    let items = allProducts.filter(p =>
-      (!category || p.category === category) &&
-      [p.title, p.description, p.location, p.category]
-        .some(v => String(v || "").toLowerCase().includes(query))
-    );
-    if (sort === "low") items.sort((a,b) => Number(a.price)-Number(b.price));
-    if (sort === "high") items.sort((a,b) => Number(b.price)-Number(a.price));
+  function openAuth(mode = "login") {
+    document.getElementById("authModal").classList.remove("hidden");
+    setAuthMode(mode);
+  }
 
-    $("productMessage").textContent = items.length
-      ? `${items.length} bidhaa zimepatikana.`
-      : "Hakuna bidhaa zilizopatikana kwa sasa.";
+  function closeModal(id) {
+    document.getElementById(id).classList.add("hidden");
+  }
 
-    $("products").innerHTML = items.map(p => {
-      const images = Array.isArray(p.image_urls) ? p.image_urls : [];
-      const imageUrl = images[0] || "";
-      const wa = String(p.whatsapp_number || "").replace(/\D/g, "");
-      const contact = wa
-        ? `https://wa.me/${encodeURIComponent(wa)}?text=${encodeURIComponent("Habari, naulizia bidhaa: " + p.title)}`
-        : "";
-      return `<article class="card">
-        ${imageUrl
-          ? `<img src="${safe(imageUrl)}" alt="${safe(p.title)}" loading="lazy" class="w-full h-52 object-cover">`
-          : `<div class="h-52 bg-gray-100 flex items-center justify-center text-gray-400">Hakuna picha</div>`}
-        <div class="p-4">
-          <p class="text-xs text-teal-700">${safe(p.category)} · ${safe(p.location)}</p>
-          <h3 class="font-bold text-lg mt-1 break-words">${safe(p.title)}</h3>
-          <p class="font-bold text-xl mt-2">${money(p.price,p.currency)}</p>
-          <p class="text-sm text-gray-600 mt-2 whitespace-pre-line break-words">${safe(p.description)}</p>
-          ${contact ? `<a class="btn primary block text-center mt-4" target="_blank" rel="noopener noreferrer" href="${contact}">Wasiliana WhatsApp</a>` : ""}
-        </div>
-      </article>`;
-    }).join("");
-  };
+  function setAuthMode(mode) {
+    authMode = mode;
+    const signup = mode === "signup";
 
-  $("authForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    const username = $("username").value.trim();
-    const phone = $("phone").value.trim();
-    const network = $("network").value;
-    const bank = $("bank").value.trim();
-    const referral = $("referral").value.trim();
+    document.getElementById("authTitle").textContent =
+      t(signup ? "Jisajili" : "Ingia", signup ? "Create account" : "Login");
 
-    message("authMessage", "Inachakata...");
-    if (!email || !password) return message("authMessage", "Weka email na nenosiri.", true);
+    document.getElementById("authSubmit").textContent =
+      t(signup ? "Tengeneza akaunti" : "Ingia", signup ? "Create account" : "Login");
 
-    // Kama jina limejazwa, tunachukulia kuwa mtumiaji anataka kujisajili.
-    if (username) {
-      const { data, error } = await db.auth.signUp({
-        email, password,
-        options: {
-          data: {
-            username, phone,
-            network_provider: network,
-            bank_name: bank,
-            referral_code_input: referral
-          }
-        }
-      });
-      if (error) return message("authMessage", error.message, true);
-      currentUser = data.user || null;
-      message("authMessage", data.session
-        ? "Usajili umefanikiwa."
-        : "Angalia email yako ili kuthibitisha akaunti. Ikiwa profile haijaundwa na trigger yako, utahitaji kurekebisha metadata mapping.");
-      updateAuthButton();
-      return;
-    }
+    document.getElementById("usernameWrap").classList.toggle("hidden", !signup);
+    document.getElementById("phoneWrap").classList.toggle("hidden", !signup);
+    document.getElementById("confirmWrap").classList.toggle("hidden", !signup);
 
-    const { data, error } = await db.auth.signInWithPassword({ email, password });
-    if (error) return message("authMessage", error.message, true);
-    currentUser = data.user;
-    updateAuthButton();
-    message("authMessage", "Umeingia kwenye akaunti.");
-    setTimeout(() => hide("auth"), 700);
-  });
+    document.getElementById("username").required = signup;
+    document.getElementById("confirmPassword").required = signup;
+    document.getElementById("password").autocomplete = signup ? "new-password" : "current-password";
 
-  window.logout = async function() {
-    const { error } = await db.auth.signOut();
-    if (error) return message("authMessage", error.message, true);
-    currentUser = null;
-    updateAuthButton();
-    message("authMessage", "Umetoka kwenye akaunti.");
-  };
+    document.getElementById("loginTab").textContent = t("Ingia", "Login");
+    document.getElementById("signupTab").textContent = t("Jisajili", "Sign up");
 
-  $("addProductForm").addEventListener("submit", async e => {
-    e.preventDefault();
+    document.getElementById("loginTab").className = signup
+      ? "rounded-lg p-3 bg-slate-100"
+      : "rounded-lg p-3 bg-emerald-800 text-white";
+
+    document.getElementById("signupTab").className = signup
+      ? "rounded-lg p-3 bg-emerald-800 text-white"
+      : "rounded-lg p-3 bg-slate-100";
+
+    document.getElementById("authMessage").textContent = "";
+  }
+
+  async function refreshSession() {
+    const { data, error } = await db.auth.getSession();
+    if (error) console.error(error.message);
+
+    currentUser = data?.session?.user || null;
+    updateAccountButton();
+  }
+
+  function updateAccountButton() {
+    document.getElementById("accountBtn").textContent = currentUser
+      ? t("Akaunti / Toka", "Account / Logout")
+      : t("Ingia", "Login");
+  }
+
+  async function accountAction() {
     if (!currentUser) {
-      message("productFormMessage", "Ingia kwenye akaunti kwanza.", true);
-      show("auth");
+      openAuth();
       return;
     }
 
-    const submit = e.submitter;
-    if (submit) submit.disabled = true;
-    message("productFormMessage", "Inahifadhi bidhaa...");
+    const shouldLogout = confirm(t("Unataka kutoka kwenye akaunti?", "Do you want to log out?"));
+    if (!shouldLogout) return;
+
+    const { error } = await db.auth.signOut();
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    currentUser = null;
+    updateAccountButton();
+  }
+
+  // Rewire the account button to support both login and logout.
+  document.getElementById("accountBtn").onclick = accountAction;
+
+  document.getElementById("authForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const message = document.getElementById("authMessage");
+    const submit = document.getElementById("authSubmit");
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    message.textContent = "";
+    submit.disabled = true;
 
     try {
-      const files = Array.from($("pImages").files || []);
-      const urls = [];
+      if (authMode === "signup") {
+        const username = document.getElementById("username").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const confirmation = document.getElementById("confirmPassword").value;
 
-      for (const file of files) {
-        if (!file.type.startsWith("image/")) throw new Error("Chagua faili za picha tu.");
-        if (file.size > 8 * 1024 * 1024) throw new Error("Kila picha iwe chini ya 8 MB.");
-        const ext = (file.name.split(".").pop() || "jpg").replace(/[^a-zA-Z0-9]/g, "");
-        const path = `${currentUser.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await db.storage.from(STORAGE_BUCKET)
-          .upload(path, file, { upsert: false, contentType: file.type });
+        if (password !== confirmation) {
+          throw new Error(t("Nenosiri halifanani.", "Passwords do not match."));
+        }
+
+        const { data, error } = await db.auth.signUp({
+          email,
+          password,
+          options: { data: { username, phone } }
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          currentUser = data.user;
+          updateAccountButton();
+          message.textContent = t("Akaunti imetengenezwa.", "Account created.");
+        } else {
+          message.textContent = t(
+            "Usajili umetumwa. Ikiwa uthibitishaji wa email umewezeshwa, angalia email yako.",
+            "Sign-up submitted. If email confirmation is enabled, check your inbox."
+          );
+        }
+      } else {
+        const { data, error } = await db.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        currentUser = data.user;
+        updateAccountButton();
+        message.textContent = t("Umeingia kwenye akaunti.", "You are logged in.");
+
+        setTimeout(() => closeModal("authModal"), 700);
+      }
+    } catch (error) {
+      message.textContent = error.message || t("Hitilafu imetokea.", "Something went wrong.");
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+  }
+
+  function formatPrice(price, currency = "TZS") {
+    return `${escapeHTML(currency)} ${Number(price || 0).toLocaleString()}`;
+  }
+
+  function productCard(product) {
+    const title = escapeHTML(product.title);
+    const location = escapeHTML(product.location || "");
+    const image = Array.isArray(product.image_urls) ? product.image_urls[0] : "";
+    const imageMarkup = image
+      ? `<img src="${escapeHTML(image)}" alt="${title}" class="product-image w-full" loading="lazy">`
+      : `<div class="product-image flex items-center justify-center text-5xl">📦</div>`;
+
+    const badges = [
+      product.is_demo
+        ? `<span class="text-xs bg-slate-100 text-slate-700 rounded px-2 py-1 font-bold">DEMO</span>`
+        : "",
+      product.is_vip
+        ? `<span class="text-xs bg-amber-100 text-amber-800 rounded px-2 py-1 font-bold">VIP</span>`
+        : ""
+    ].filter(Boolean).join(" ");
+
+    const whatsappDigits = String(product.whatsapp_number || "").replace(/\D/g, "");
+    const whatsappMarkup = !product.is_demo && whatsappDigits
+      ? `<a href="https://wa.me/${whatsappDigits}" target="_blank" rel="noopener noreferrer"
+           class="block mt-3 text-center bg-green-600 hover:bg-green-700 text-white rounded-xl p-3 font-semibold">
+           ${t("Wasiliana WhatsApp", "Contact on WhatsApp")}
+         </a>`
+      : `<p class="text-xs text-slate-500 mt-3">${product.is_demo
+          ? t("Bidhaa ya mfano — si tangazo halisi.", "Demo listing — not a real offer.")
+          : t("Muuzaji hajaweka WhatsApp.", "Seller has not provided WhatsApp.")}</p>`;
+
+    return `
+      <article class="product-card bg-white border rounded-2xl overflow-hidden">
+        ${imageMarkup}
+        <div class="p-4">
+          <div class="flex flex-wrap gap-2">${badges}</div>
+          <h3 class="font-bold text-lg mt-3 break-words">${title}</h3>
+          <p class="text-emerald-800 font-extrabold text-xl mt-2">${formatPrice(product.price, product.currency)}</p>
+          <p class="text-sm text-slate-500 mt-2">📍 ${location}</p>
+          ${whatsappMarkup}
+        </div>
+      </article>`;
+  }
+
+  function renderProducts() {
+    const search = document.getElementById("searchInput").value.toLowerCase().trim();
+    const category = document.getElementById("categoryFilter").value;
+    const sort = document.getElementById("sortFilter").value;
+
+    let filtered = allProducts.filter(product => {
+      const searchable = `${product.title || ""} ${product.description || ""} ${product.location || ""}`.toLowerCase();
+      return searchable.includes(search) &&
+        (category === "all" || product.category === category);
+    });
+
+    filtered.sort((a, b) => {
+      if (sort === "low") return Number(a.price) - Number(b.price);
+      if (sort === "high") return Number(b.price) - Number(a.price);
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    });
+
+    const vip = filtered.filter(p => p.is_vip);
+    const standard = filtered.filter(p => !p.is_vip);
+
+    document.getElementById("vipProducts").innerHTML = vip.length
+      ? vip.map(productCard).join("")
+      : `<p class="text-slate-500 col-span-full">${t("Hakuna bidhaa za VIP.", "No VIP products found.")}</p>`;
+
+    document.getElementById("standardProducts").innerHTML = standard.length
+      ? standard.map(productCard).join("")
+      : `<p class="text-slate-500 col-span-full">${t("Hakuna bidhaa zilizopatikana.", "No products found.")}</p>`;
+  }
+
+  async function loadProducts() {
+    const { data, error } = await db
+      .from("products")
+      .select("id,title,category,price,currency,location,description,image_urls,whatsapp_number,status,created_at")
+      .eq("status", "active")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.warn("Could not load database products:", error.message);
+      realProducts = [];
+    } else {
+      realProducts = (data || []).map(product => ({
+        ...product,
+        is_vip: false,
+        is_demo: false
+      }));
+    }
+
+    allProducts = [...demoProducts, ...realProducts];
+    renderProducts();
+  }
+
+  async function postProduct() {
+    const { data, error } = await db.auth.getUser();
+
+    if (error || !data.user) {
+      openAuth("login");
+      return;
+    }
+
+    currentUser = data.user;
+    document.getElementById("productModal").classList.remove("hidden");
+  }
+
+  document.getElementById("productForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const message = document.getElementById("productMessage");
+    const submit = document.getElementById("productSubmit");
+    submit.disabled = true;
+    message.textContent = t("Inawasilisha bidhaa...", "Submitting product...");
+
+    let uploadedPath = null;
+
+    try {
+      const { data: userData, error: userError } = await db.auth.getUser();
+      if (userError || !userData.user) throw new Error(t("Tafadhali ingia kwanza.", "Please log in first."));
+
+      const user = userData.user;
+      const file = document.getElementById("pImage").files[0];
+      const imageUrls = [];
+
+      if (file) {
+        const allowed = ["image/jpeg", "image/png", "image/webp"];
+        if (!allowed.includes(file.type)) throw new Error(t("Tumia picha ya JPEG, PNG au WebP.", "Use a JPEG, PNG or WebP image."));
+        if (file.size > 5 * 1024 * 1024) throw new Error(t("Picha isizidi MB 5.", "Image must be under 5 MB."));
+
+        const extension = file.name.split(".").pop().toLowerCase();
+        uploadedPath = `${user.id}/${Date.now()}.${extension}`;
+
+        const { error: uploadError } = await db.storage
+          .from(STORAGE_BUCKET)
+          .upload(uploadedPath, file, { upsert: false, contentType: file.type });
+
         if (uploadError) throw uploadError;
-        const { data: urlData } = db.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-        urls.push(urlData.publicUrl);
+
+        const { data: publicData } = db.storage
+          .from(STORAGE_BUCKET)
+          .getPublicUrl(uploadedPath);
+
+        imageUrls.push(publicData.publicUrl);
       }
 
-      const product = {
-        seller_id: currentUser.id,
-        title: $("pTitle").value.trim(),
-        category: $("pCategory").value,
-        price: Number($("pPrice").value),
-        currency: $("pCurrency").value,
-        location: $("pLocation").value.trim(),
-        description: $("pDescription").value.trim(),
-        whatsapp_number: $("pWhatsapp").value.trim(),
-        image_urls: urls,
+      const payload = {
+        seller_id: user.id,
+        title: document.getElementById("pTitle").value.trim(),
+        category: document.getElementById("pCategory").value,
+        price: Number(document.getElementById("pPrice").value),
+        currency: "TZS",
+        location: document.getElementById("pLocation").value.trim(),
+        description: document.getElementById("pDescription").value.trim(),
+        image_urls: imageUrls,
+        whatsapp_number: document.getElementById("pWhatsapp").value.trim(),
         status: "active"
       };
 
-      const { error } = await db.from("products").insert(product);
-      if (error) throw error;
+      const { error: insertError } = await db.from("products").insert(payload);
+      if (insertError) throw insertError;
 
-      message("productFormMessage", "Bidhaa imechapishwa!");
-      $("addProductForm").reset();
+      message.textContent = t("Bidhaa imewasilishwa.", "Product submitted.");
+      document.getElementById("productForm").reset();
+
       await loadProducts();
-      setTimeout(() => hide("productForm"), 800);
-    } catch (err) {
-      message("productFormMessage",
-        "Imeshindikana: " + (err.message || "Kosa lisilojulikana") +
-        ". Hakikisha bucket na RLS policies za Storage zipo.", true);
+      setTimeout(() => closeModal("productModal"), 900);
+    } catch (error) {
+      message.textContent = error.message || t("Imeshindikana kuwasilisha bidhaa.", "Could not submit product.");
+      console.error("Product submission failed:", error);
     } finally {
-      if (submit) submit.disabled = false;
+      submit.disabled = false;
     }
   });
 
-  $("vipForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    if (!currentUser) {
-      message("vipMessage", "Ingia kwenye akaunti kwanza.", true);
-      show("auth");
-      return;
-    }
-    const packageType = $("vipPackage").value;
-    const amount = packageType === "weekly" ? 3000 : 10000;
-    const transactionId = $("transactionId").value.trim();
-    const paymentPhone = $("paymentPhone").value.trim();
-
-    message("vipMessage", "Inatuma ombi...");
-    const { error } = await db.from("vip_payment_requests").insert({
-      user_id: currentUser.id,
-      package_type: packageType,
-      amount_tzs: amount,
-      transaction_id: transactionId,
-      payment_phone: paymentPhone,
-      status: "pending"
-    });
-    if (error) return message("vipMessage", error.message, true);
-
-    message("vipMessage", "Ombi limetumwa. Subiri admin athibitishe malipo.");
-    $("vipForm").reset();
+  db.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user || null;
+    updateAccountButton();
   });
 
-  window.shareReferral = async function() {
-    if (!currentUser) {
-      $("refMessage").textContent = "Ingia kwenye akaunti kwanza.";
-      show("auth");
-      return;
-    }
-    const { data, error } = await db.from("profiles")
-      .select("referral_code").eq("id", currentUser.id).maybeSingle();
-    if (error) {
-      $("refMessage").textContent = "Imeshindikana kupata referral code: " + error.message;
-      return;
-    }
-    const code = data?.referral_code;
-    if (!code) {
-      $("refMessage").textContent = "Referral code haijapatikana kwenye profile yako.";
-      return;
-    }
-    const link = location.origin + location.pathname + "?ref=" + encodeURIComponent(code);
-    try {
-      await navigator.clipboard.writeText(link);
-      $("refMessage").textContent = "Kiungo kimenakiliwa: " + link;
-    } catch {
-      $("refMessage").textContent = link;
-    }
-  };
-
-  async function loadAnnouncements() {
-    const now = new Date().toISOString();
-    const { data, error } = await db.from("announcements")
-      .select("id,title_en,title_sw,body_en,body_sw,image_url,target_url")
-      .eq("is_active", true)
-      .lte("starts_at", now)
-      .or(`expires_at.is.null,expires_at.gte.${now}`)
-      .order("created_at", { ascending: false })
-      .limit(6);
-
-    if (error) {
-      console.warn("Announcements:", error.message);
-      return;
-    }
-    if (!data?.length) return;
-
-    $("announcementsSection").classList.remove("hidden");
-    $("announcements").innerHTML = data.map(a => {
-      const title = language === "sw" ? a.title_sw : a.title_en;
-      const body = language === "sw" ? a.body_sw : a.body_en;
-      const image = a.image_url
-        ? `<img src="${safe(a.image_url)}" alt="" class="w-full h-40 object-cover">`
-        : "";
-      const link = a.target_url && /^https?:\/\//i.test(a.target_url)
-        ? `<a href="${safe(a.target_url)}" target="_blank" rel="noopener noreferrer" class="text-teal-700 font-semibold mt-2 inline-block">Tazama zaidi →</a>`
-        : "";
-      return `<article class="card">${image}<div class="p-4"><h3 class="font-bold">${safe(title)}</h3><p class="text-sm mt-2">${safe(body)}</p>${link}</div></article>`;
-    }).join("");
-  }
-
-  init();
-})();
+  setAuthMode("login");
+  refreshSession();
+  loadProducts();
 </script>
+
 </body>
 </html>
