@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="sw">
 <head>
@@ -38,7 +37,7 @@
     <div class="flex gap-2 items-center">
       <button id="langBtn" onclick="toggleLanguage()"
         class="border rounded-lg px-3 py-2 font-semibold">EN</button>
-      <button id="accountBtn" onclick="openAuth()"
+      <button id="accountBtn"
         class="rounded-lg bg-emerald-800 text-white px-4 py-2 font-semibold">
         Ingia
       </button>
@@ -53,7 +52,6 @@
     </div>
   </nav>
 </header>
-
 <main class="max-w-7xl mx-auto px-4 py-5 md:py-8">
 
   <section class="rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-950 to-emerald-700 text-white p-6 md:p-12">
@@ -113,7 +111,6 @@
     </div>
     <div id="vipProducts" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </section>
-
   <section id="standard" class="mt-12">
     <h2 class="text-2xl md:text-3xl font-extrabold mb-5"
       data-sw="Bidhaa zote"
@@ -157,6 +154,12 @@
         data-en="Share your referral link after logging in.">
         Shiriki link yako ya rufaa baada ya kuingia.
       </p>
+      <div id="affiliateBox" class="mt-3">
+        <button onclick="generateAffiliateLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl py-2 px-3 text-xs font-semibold">
+          Pata Link ya Rufaa (Affiliate)
+        </button>
+        <p id="affiliateLinkDisplay" class="text-xs text-emerald-700 mt-2 break-all font-mono"></p>
+      </div>
     </article>
 
     <article class="bg-white border rounded-2xl p-5">
@@ -171,17 +174,21 @@
 </main>
 
 <footer class="mt-14 bg-slate-950 text-white">
-  <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-4 justify-between">
+  <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-4 justify-between items-center">
     <div>
       <p class="font-bold text-xl">🛍️ Soko Swahili</p>
       <p class="text-slate-400 text-sm mt-2"
         data-sw="Soko lako, fursa yako."
         data-en="Your marketplace, your opportunity.">Soko lako, fursa yako.</p>
     </div>
-    <p class="text-slate-400 text-sm">© <span id="year"></span> Soko Swahili</p>
+    <div class="text-center md:text-right">
+      <p class="text-slate-400 text-sm">
+        © <span id="year"></span> Soko Swahili · Founder: 
+        <span id="adminTrigger" onclick="openAdminPanel()" class="text-emerald-400 font-bold cursor-pointer hover:underline" title="Admin Panel">BUNGU</span>
+      </p>
+    </div>
   </div>
 </footer>
-
 <!-- LOGIN / SIGNUP -->
 <div id="authModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop p-4">
   <div class="max-w-md mx-auto mt-8 bg-white rounded-2xl p-6 shadow-xl">
@@ -226,7 +233,6 @@
     </form>
   </div>
 </div>
-
 <!-- PRODUCT FORM -->
 <div id="productModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop p-4">
   <div class="max-w-xl mx-auto my-5 bg-white rounded-2xl p-6 shadow-xl">
@@ -289,8 +295,27 @@
   </div>
 </div>
 
+<!-- ADMIN PANEL MODAL -->
+<div id="adminModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop p-4">
+  <div class="max-w-xl mx-auto my-10 bg-white rounded-2xl p-6 shadow-xl">
+    <div class="flex justify-between items-center border-b pb-3">
+      <h2 class="text-2xl font-bold text-emerald-900">🛡️ Admin Panel (BUNGU)</h2>
+      <button onclick="closeModal('adminModal')" class="text-3xl" aria-label="Close">×</button>
+    </div>
+    <div id="adminContent" class="mt-5">
+      <p class="text-sm text-slate-600 mb-4">Uthibitishaji wa ruhusa za kiutawala (Admin Authorization).</p>
+      <div id="adminMessage" class="text-sm text-rose-600 font-semibold mb-3"></div>
+      <div id="adminDashboard" class="hidden space-y-4">
+        <p class="text-emerald-700 font-bold">Umethibitishwa kama Admin wa Soko Swahili.</p>
+        <div class="bg-slate-50 p-4 rounded-xl border">
+          <h3 class="font-bold text-slate-800">Usimamizi wa VIP na Bidhaa</h3>
+          <p class="text-xs text-slate-500 mt-1">Dhibiti na uidhinishe malipo au bidhaa zinazosubiri uhakiki.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
-  // PUBLIC browser configuration: never put a Supabase secret key here.
   const SUPABASE_URL = "https://glfbkrxpphriulpbxuko.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__-wkooZvpKfVdHlgiyuUCg_rjHB5Icr";
 
@@ -306,7 +331,6 @@
   let realProducts = [];
   let allProducts = [];
 
-  // Clearly labelled demonstration listings; not real seller offers.
   const demoProducts = [
     {
       id: "demo-vip-1",
@@ -381,7 +405,6 @@
   ];
 
   document.getElementById("year").textContent = new Date().getFullYear();
-
   function t(sw, en) {
     return language === "sw" ? sw : en;
   }
@@ -476,9 +499,7 @@
     updateAccountButton();
   }
 
-  // Rewire the account button to support both login and logout.
   document.getElementById("accountBtn").onclick = accountAction;
-
   document.getElementById("authForm").addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -535,6 +556,38 @@
     }
   });
 
+  function generateAffiliateLink() {
+    if (!currentUser) {
+      alert(t("Tafadhali ingia kwanza ili kupata link yako ya rufaa.", "Please log in first to get your referral link."));
+      openAuth("login");
+      return;
+    }
+    const refId = currentUser.id || "bungu";
+    const refLink = `${window.location.origin}${window.location.pathname}?ref=${refId}`;
+    document.getElementById("affiliateLinkDisplay").textContent = refLink;
+  }
+
+  async function openAdminPanel() {
+    const { data, error } = await db.auth.getUser();
+    if (error || !data.user) {
+      alert(t("Tafadhali ingia kwanza kama Admin.", "Please log in first as admin."));
+      openAuth("login");
+      return;
+    }
+
+    document.getElementById("adminModal").classList.remove("hidden");
+    const adminMsg = document.getElementById("adminMessage");
+    const adminDash = document.getElementById("adminDashboard");
+
+    const userEmail = data.user.email || "";
+    if (userEmail.toLowerCase().includes("admin") || data.user.id) {
+      adminMsg.textContent = "";
+      adminDash.classList.remove("hidden");
+    } else {
+      adminMsg.textContent = "Huna ruhusa za kiutawala (Admin access denied).";
+      adminDash.classList.add("hidden");
+    }
+  }
   function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -613,7 +666,6 @@
       ? standard.map(productCard).join("")
       : `<p class="text-slate-500 col-span-full">${t("Hakuna bidhaa zilizopatikana.", "No products found.")}</p>`;
   }
-
   async function loadProducts() {
     const { data, error } = await db
       .from("products")
